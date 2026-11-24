@@ -1,0 +1,12 @@
+{
+  "name": "Combustível",
+  "short_name": "Combustível",
+  "start_url": "./",
+  "display": "browser",
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

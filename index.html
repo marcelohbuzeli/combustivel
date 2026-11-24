@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-title" content="Combustível">
+<title>Combustível</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg:#0f1115; --card:#181b22; --line:#262a33; --txt:#eef0f4; --mut:#8b92a1;
+    --acc:#ffb020; --acc2:#ff7a1a; --ok:#3ccf91; --err:#ff5c5c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 96px);max-width:560px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  h1{font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .month{display:flex;align-items:center;gap:6px}
+  .month button{background:var(--card);border:1px solid var(--line);color:var(--txt);width:34px;height:34px;border-radius:10px;font-size:18px}
+  .month span{min-width:84px;text-align:center;font-weight:600;text-transform:capitalize}
+  .hero{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#1a1206;border-radius:20px;padding:20px;margin-bottom:12px}
+  .hero small{font-weight:600;opacity:.75}
+  .hero .big{font-size:40px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-top:2px}
+  .hero .sub{font-weight:600;opacity:.8;margin-top:4px;font-size:14px}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:22px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 12px}
+  .stat small{color:var(--mut);font-size:12px;font-weight:600}
+  .stat b{display:block;font-size:20px;margin-top:4px;letter-spacing:-.02em}
+  .stat i{font-style:normal;color:var(--mut);font-size:12px;font-weight:500}
+  h2{font-size:14px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:0 4px 10px}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;justify-content:space-between;gap:10px;cursor:pointer}
+  .item .l b{display:block}
+  .item .l span,.item .r span{color:var(--mut);font-size:13px}
+  .item .r{text-align:right}
+  .item .r b{display:block}
+  .empty{color:var(--mut);text-align:center;padding:30px 10px;border:1px dashed var(--line);border-radius:16px}
+  .fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 20px);background:var(--acc);color:#1a1206;border:0;border-radius:999px;padding:16px 28px;font-size:17px;font-weight:700;box-shadow:0 10px 30px rgba(255,160,32,.35)}
+  .tools{display:flex;gap:8px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+  .tools button,.tools label{background:none;border:1px solid var(--line);color:var(--mut);border-radius:10px;padding:8px 12px;font-size:13px}
+  /* modal */
+  .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:10}
+  .sheet-bg.open{display:flex}
+  .sheet{background:var(--card);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom) + 18px);border-top:1px solid var(--line);max-height:92vh;overflow:auto}
+  .sheet h3{font-size:20px;margin-bottom:4px}
+  .sheet p.hint{color:var(--mut);font-size:14px;margin-bottom:14px}
+  .badge{display:inline-block;background:rgba(60,207,145,.15);color:var(--ok);font-size:12px;font-weight:700;padding:4px 8px;border-radius:8px;margin-bottom:10px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:13px;color:var(--mut);font-weight:600;margin-bottom:5px}
+  .field input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:13px 12px;font-size:17px;-webkit-appearance:none}
+  .field input:focus{outline:none;border-color:var(--acc)}
+  .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .grid>*,.row>*{min-width:0}
+  .field input[type=date]{min-height:50px}
+  .calc{color:var(--mut);font-size:13px;margin:-4px 0 12px;min-height:18px}
+  .btns{display:flex;gap:10px;margin-top:6px}
+  .btns button{flex:1;border:0;border-radius:14px;padding:15px;font-size:16px;font-weight:700}
+  .primary{background:var(--acc);color:#1a1206}
+  .ghost{background:var(--bg);color:var(--txt);border:1px solid var(--line)!important}
+  .danger{background:none;color:var(--err);border:0;font-size:14px;margin-top:14px;width:100%;padding:8px}
+  .err{color:var(--err);font-size:13px;min-height:18px;margin-bottom:6px}
+  .toast{position:fixed;top:calc(env(safe-area-inset-top) + 14px);left:50%;transform:translate(-50%,-80px);background:var(--ok);color:#06210f;font-weight:700;padding:10px 16px;border-radius:12px;transition:transform .25s;z-index:20}
+  .toast.show{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<header>
+  <h1>⛽ Combustível</h1>
+  <div class="month">
+    <button id="prev" aria-label="Mês anterior">‹</button>
+    <span id="monthLabel"></span>
+    <button id="next" aria-label="Próximo mês">›</button>
+  </div>
+</header>
+
+<section class="hero">
+  <small>Gasto no mês</small>
+  <div class="big" id="sTotal">R$ 0,00</div>
+  <div class="sub" id="sCount">Nenhum abastecimento</div>
+</section>
+
+<section class="grid">
+  <div class="stat"><small>Litros</small><b id="sLitros">0</b><i>L</i></div>
+  <div class="stat"><small>Rodados</small><b id="sKm">0</b><i>km</i></div>
+  <div class="stat"><small>Média</small><b id="sMedia">—</b><i>km/L</i></div>
+</section>
+
+<h2>Abastecimentos</h2>
+<div class="list" id="list"></div>
+
+<div class="tools">
+  <button id="exportBtn">Exportar backup</button>
+  <label>Importar backup<input type="file" id="importInput" accept="application/json" hidden></label>
+</div>
+
+<button class="fab" id="addBtn">+ Abastecer</button>
+
+<div class="sheet-bg" id="sheetBg">
+  <form class="sheet" id="form" autocomplete="off">
+    <div class="badge" id="applePayBadge" hidden> Pagamento detectado</div>
+    <h3 id="formTitle">Novo abastecimento</h3>
+    <p class="hint" id="formHint">Preencha os dados do abastecimento.</p>
+    <div class="row">
+      <div class="field"><label for="fValor">Valor (R$)</label><input id="fValor" inputmode="decimal" placeholder="0,00"></div>
+      <div class="field"><label for="fLitros">Litros</label><input id="fLitros" inputmode="decimal" placeholder="0,00"></div>
+    </div>
+    <div class="calc" id="precoL"></div>
+    <div class="field"><label for="fOdo">Odômetro atual (km)</label><input id="fOdo" inputmode="numeric" placeholder="Ex.: 45210"></div>
+    <div class="calc" id="odoInfo"></div>
+    <div class="row">
+      <div class="field"><label for="fData">Data</label><input id="fData" type="date"></div>
+      <div class="field"><label for="fPosto">Posto</label><input id="fPosto" placeholder="Opcional"></div>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="btns">
+      <button type="button" class="ghost" id="cancelBtn">Cancelar</button>
+      <button type="submit" class="primary">Salvar</button>
+    </div>
+    <button type="button" class="danger" id="delBtn" hidden>Excluir abastecimento</button>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'combustivel.v1';
+const $ = id => document.getElementById(id);
+const brl = n => n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const num = (n,d=1) => n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+
+let data = load();
+let view = new Date(); view.setDate(1);
+let editingId = null;
+
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch{ return []; } }
+function save(){ localStorage.setItem(KEY, JSON.stringify(data)); }
+
+// Aceita "R$ 1.234,56", "1234,56", "1234.56", "150"
+function parseMoney(s){
+  if(s==null) return NaN;
+  s = String(s).replace(/[^\d.,-]/g,'');
+  if(!s) return NaN;
+  const lc = s.lastIndexOf(','), ld = s.lastIndexOf('.');
+  if(lc > ld) s = s.replace(/\./g,'').replace(',','.');
+  else if(ld > lc && lc !== -1) s = s.replace(/,/g,'');
+  else if(lc === -1 && ld !== -1 && s.split('.').length > 2) s = s.replace(/\./g,'');
+  return parseFloat(s);
+}
+const todayISO = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+
+// Ordena por odômetro e calcula km rodados desde o abastecimento anterior
+function enriched(){
+  const s = [...data].sort((a,b)=> a.odo - b.odo || a.data.localeCompare(b.data));
+  return s.map((e,i)=>{
+    const prev = s[i-1];
+    const km = prev ? e.odo - prev.odo : null;
+    return {...e, km, kml: km && e.litros ? km / e.litros : null};
+  });
+}
+
+function render(){
+  $('monthLabel').textContent = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][view.getMonth()] + ' ' + view.getFullYear();
+  const ym = `${view.getFullYear()}-${String(view.getMonth()+1).padStart(2,'0')}`;
+  const all = enriched();
+  const mes = all.filter(e => e.data.slice(0,7) === ym);
+  const total = mes.reduce((t,e)=>t+e.valor,0);
+  const litros = mes.reduce((t,e)=>t+e.litros,0);
+  const comKm = mes.filter(e => e.km != null);
+  const km = comKm.reduce((t,e)=>t+e.km,0);
+  const litrosKm = comKm.reduce((t,e)=>t+e.litros,0);
+  $('sTotal').textContent = brl(total);
+  $('sCount').textContent = mes.length ? `${mes.length} abastecimento${mes.length>1?'s':''} · ${litros? brl(total/litros):''}/L em média` : 'Nenhum abastecimento';
+  $('sLitros').textContent = num(litros,1);
+  $('sKm').textContent = num(km,0);
+  $('sMedia').textContent = litrosKm ? num(km/litrosKm,1) : '—';
+
+  const list = $('list');
+  if(!mes.length){ list.innerHTML = '<div class="empty">Nenhum abastecimento neste mês.<br>Toque em <b>+ Abastecer</b>.</div>'; return; }
+  list.innerHTML = '';
+  [...mes].sort((a,b)=> b.data.localeCompare(a.data) || b.odo - a.odo).forEach(e=>{
+    const d = new Date(e.data+'T12:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','');
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.innerHTML = `<div class="l"><b></b><span></span></div><div class="r"><b>${brl(e.valor)}</b><span>${num(e.litros,2)} L · ${e.kml? num(e.kml,1)+' km/L' : '1º registro'}</span></div>`;
+    el.querySelector('.l b').textContent = e.posto || 'Abastecimento';
+    el.querySelector('.l span').textContent = `${d} · ${e.odo.toLocaleString('pt-BR')} km${e.km!=null? ' · +'+e.km.toLocaleString('pt-BR')+' km':''}`;
+    el.onclick = () => openForm(e);
+    list.appendChild(el);
+  });
+}
+
+function lastOdo(excludeId){
+  const o = data.filter(e=>e.id!==excludeId).map(e=>e.odo);
+  return o.length ? Math.max(...o) : null;
+}
+
+function updateCalc(){
+  const v = parseMoney($('fValor').value), l = parseMoney($('fLitros').value), o = parseInt($('fOdo').value.replace(/\D/g,''));
+  $('precoL').textContent = v>0 && l>0 ? `Preço por litro: ${brl(v/l)}` : '';
+  const lo = lastOdo(editingId);
+  if(lo==null) $('odoInfo').textContent = 'Primeiro registro: a média aparece a partir do próximo.';
+  else if(o>0) $('odoInfo').textContent = o>lo ? `+${(o-lo).toLocaleString('pt-BR')} km desde o último (${lo.toLocaleString('pt-BR')} km)` + (l>0? ` · ${num((o-lo)/l,1)} km/L`:'') : `Último odômetro: ${lo.toLocaleString('pt-BR')} km`;
+  else $('odoInfo').textContent = `Último odômetro: ${lo.toLocaleString('pt-BR')} km`;
+}
+
+function openForm(entry, prefill){
+  editingId = entry ? entry.id : null;
+  $('err').textContent = '';
+  $('applePayBadge').hidden = !prefill;
+  $('formTitle').textContent = entry ? 'Editar abastecimento' : prefill ? 'Abasteceu? Complete aí' : 'Novo abastecimento';
+  $('formHint').textContent = prefill ? 'O valor já veio do Apple Pay. Falta só informar os litros e o odômetro.' : 'Preencha os dados do abastecimento.';
+  $('fValor').value = entry ? num(entry.valor,2) : prefill?.valor ? num(prefill.valor,2) : '';
+  $('fLitros').value = entry ? num(entry.litros,2) : '';
+  $('fOdo').value = entry ? entry.odo : '';
+  $('fData').value = entry ? entry.data : todayISO();
+  $('fPosto').value = entry ? (entry.posto||'') : (prefill?.posto || '');
+  $('delBtn').hidden = !entry;
+  $('sheetBg').classList.add('open');
+  updateCalc();
+  setTimeout(()=> (prefill ? $('fLitros') : entry ? null : $('fValor'))?.focus(), 250);
+}
+function closeForm(){ $('sheetBg').classList.remove('open'); editingId = null; }
+
+$('form').onsubmit = ev => {
+  ev.preventDefault();
+  const valor = parseMoney($('fValor').value), litros = parseMoney($('fLitros').value);
+  const odo = parseInt($('fOdo').value.replace(/\D/g,''));
+  const dataStr = $('fData').value || todayISO();
+  if(!(valor>0)) return $('err').textContent = 'Informe o valor.';
+  if(!(litros>0)) return $('err').textContent = 'Informe os litros.';
+  if(!(odo>0)) return $('err').textContent = 'Informe o odômetro.';
+  if(data.some(e=>e.odo===odo && e.id!==editingId)) return $('err').textContent = 'Já existe um abastecimento com esse odômetro.';
+  const rec = {id: editingId || Date.now().toString(36), valor, litros, odo, data: dataStr, posto: $('fPosto').value.trim()};
+  if(editingId) data = data.map(e=> e.id===editingId ? rec : e); else data.push(rec);
+  save();
+  view = new Date(dataStr+'T12:00'); view.setDate(1);
+  closeForm(); render(); toast('Salvo ✓');
+};
+$('delBtn').onclick = () => {
+  if(!confirm('Excluir este abastecimento?')) return;
+  data = data.filter(e=>e.id!==editingId); save(); closeForm(); render(); toast('Excluído');
+};
+$('cancelBtn').onclick = closeForm;
+$('sheetBg').onclick = e => { if(e.target.id==='sheetBg') closeForm(); };
+['fValor','fLitros','fOdo'].forEach(id => $(id).addEventListener('input', updateCalc));
+$('addBtn').onclick = () => openForm();
+$('prev').onclick = () => { view.setMonth(view.getMonth()-1); render(); };
+$('next').onclick = () => { view.setMonth(view.getMonth()+1); render(); };
+
+$('exportBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `combustivel-backup-${todayISO()}.json`; a.click();
+};
+$('importInput').onchange = async e => {
+  const f = e.target.files[0]; if(!f) return;
+  try{
+    const arr = JSON.parse(await f.text());
+    if(!Array.isArray(arr)) throw 0;
+    const ids = new Set(data.map(x=>x.id));
+    arr.forEach(x=>{ if(x && x.id && !ids.has(x.id) && x.valor>0 && x.litros>0 && x.odo>0 && x.data) data.push(x); });
+    save(); render(); toast('Backup importado');
+  }catch{ alert('Arquivo inválido.'); }
+  e.target.value='';
+};
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+
+// Vindo do Atalho do Apple Pay: ?valor=R$ 150,00&posto=Shell
+(function fromShortcut(){
+  const p = new URLSearchParams(location.search);
+  if(!p.has('valor')) return;
+  const prefill = {valor: parseMoney(p.get('valor')), posto: (p.get('posto')||'').trim()};
+  history.replaceState(null,'',location.pathname);
+  if(prefill.valor>0) openForm(null, prefill);
+})();
+
+if(navigator.storage?.persist) navigator.storage.persist();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+render();
+</script>
+</body>
+</html>
